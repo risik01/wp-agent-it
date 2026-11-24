@@ -8,13 +8,14 @@ I siti con il plugin installato si aggiornano dalle **release** di questo reposi
 
 1. Modifica il codice.
 2. Alza la versione nell'intestazione di `wp-ai-agent.php` (`Version: 0.2.1`).
-3. Fai commit e crea il tag con lo stesso numero:
+3. Fai commit e push su `main`, poi crea il tag con lo stesso numero, in uno dei due modi:
+   - **da GitHub:** Releases → *Draft a new release* → *Choose a tag* → scrivi `v0.2.1` → *Create new tag* → *Publish release*;
+   - **da terminale:**
 
-   ```bash
-   git commit -am "Versione 0.2.1"
-   git tag v0.2.1
-   git push && git push --tags
-   ```
+     ```bash
+     git tag v0.2.1
+     git push --tags
+     ```
 
 4. La GitHub Action `Release` controlla che tag e versione coincidano, verifica la sintassi PHP, crea `wp-ai-agent.zip` e pubblica la release.
 5. WordPress vede l'aggiornamento entro 12 ore, oppure subito con **Plugin → Agente AI → Controlla aggiornamenti**. Con gli aggiornamenti automatici attivi lo installa da solo.

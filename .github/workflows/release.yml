@@ -1,6 +1,7 @@
 name: Release
 
-# Pubblica una release quando fai push di un tag tipo v0.2.1.
+# Si avvia quando nasce un tag tipo v0.2.1: sia con git push --tags,
+# sia creando una release dall'interfaccia di GitHub (Releases → Draft a new release).
 # I siti WordPress con il plugin vedranno l'aggiornamento entro qualche ora
 # (o subito con "Controlla aggiornamenti").
 on:
@@ -35,7 +36,12 @@ jobs:
           git archive --format=zip --prefix=wp-ai-agent/ -o wp-ai-agent.zip HEAD
           unzip -l wp-ai-agent.zip
 
-      - name: Pubblica la release
+      - name: Pubblica la release (o allega lo zip a quella creata da GitHub)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" wp-ai-agent.zip --title "$GITHUB_REF_NAME" --generate-notes
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" wp-ai-agent.zip --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" wp-ai-agent.zip --title "$GITHUB_REF_NAME" --generate-notes
+          fi
