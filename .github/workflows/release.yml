@@ -1,0 +1,41 @@
+name: Release
+
+# Pubblica una release quando fai push di un tag tipo v0.2.1.
+# I siti WordPress con il plugin vedranno l'aggiornamento entro qualche ora
+# (o subito con "Controlla aggiornamenti").
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verifica che la versione del plugin coincida con il tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER=$(grep -m1 -E '^\s*\*\s*Version:' wp-ai-agent.php | sed -E 's/.*Version:\s*//' | tr -d '[:space:]')
+          echo "Tag: $TAG  -  Version nel plugin: $VER"
+          if [ "$TAG" != "$VER" ]; then
+            echo "::error::Il tag ($TAG) non coincide con 'Version:' in wp-ai-agent.php ($VER)."
+            exit 1
+          fi
+
+      - name: Controllo sintassi PHP
+        run: find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Crea lo zip del plugin
+        run: |
+          git archive --format=zip --prefix=wp-ai-agent/ -o wp-ai-agent.zip HEAD
+          unzip -l wp-ai-agent.zip
+
+      - name: Pubblica la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" wp-ai-agent.zip --title "$GITHUB_REF_NAME" --generate-notes

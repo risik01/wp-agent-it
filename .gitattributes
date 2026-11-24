@@ -1,0 +1,6 @@
+# File esclusi dallo zip del plugin (git archive)
+.github        export-ignore
+.gitignore     export-ignore
+.gitattributes export-ignore
+README.md      export-ignore
+tests          export-ignore
